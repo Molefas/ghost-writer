@@ -23,8 +23,17 @@ export function manageSources(storage: TrikStorageContext) {
             addedAt: new Date().toISOString(),
             lastScanned: null,
           };
-          await storage.set(KEYS.source(id), source);
-          await addToIndex(storage, KEYS.sourceIndex, id);
+          try {
+            await storage.set(KEYS.source(id), source);
+            await addToIndex(storage, KEYS.sourceIndex, id);
+          } catch (err) {
+            return JSON.stringify({
+              action: 'added',
+              sourceType: input.sourceType,
+              sourceName: input.name,
+              error: `Failed to save source: ${err instanceof Error ? err.message : 'unknown error'}`,
+            });
+          }
           return JSON.stringify({
             action: 'added',
             sourceType: input.sourceType,
@@ -43,8 +52,17 @@ export function manageSources(storage: TrikStorageContext) {
               error: 'Source not found',
             });
           }
-          await storage.delete(KEYS.source(source.id));
-          await removeFromIndex(storage, KEYS.sourceIndex, source.id);
+          try {
+            await storage.delete(KEYS.source(source.id));
+            await removeFromIndex(storage, KEYS.sourceIndex, source.id);
+          } catch (err) {
+            return JSON.stringify({
+              action: 'removed',
+              sourceType: source.type,
+              sourceName: source.name,
+              error: `Failed to remove source: ${err instanceof Error ? err.message : 'unknown error'}`,
+            });
+          }
           return JSON.stringify({
             action: 'removed',
             sourceType: source.type,
@@ -83,7 +101,16 @@ export function manageSources(storage: TrikStorageContext) {
           if (input.name) source.name = input.name;
           if (input.url) source.url = input.url;
           if (input.email) source.email = input.email;
-          await storage.set(KEYS.source(source.id), source);
+          try {
+            await storage.set(KEYS.source(source.id), source);
+          } catch (err) {
+            return JSON.stringify({
+              action: 'updated',
+              sourceType: source.type,
+              sourceName: source.name,
+              error: `Failed to update source: ${err instanceof Error ? err.message : 'unknown error'}`,
+            });
+          }
           return JSON.stringify({
             action: 'updated',
             sourceType: source.type,

@@ -50,6 +50,14 @@ export function searchInspirations(storage: TrikStorageContext) {
       // Filter by date
       if (input.since) {
         const sinceDate = new Date(input.since).getTime();
+        if (Number.isNaN(sinceDate)) {
+          return JSON.stringify({
+            resultCount: 0,
+            searchCriteria: `since=${input.since}`,
+            error: `Invalid date format: "${input.since}". Use ISO 8601 format (e.g., 2026-01-15).`,
+            inspirations: [],
+          });
+        }
         inspirations = inspirations.filter(
           (i) => new Date(i.addedAt).getTime() >= sinceDate,
         );

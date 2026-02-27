@@ -65,13 +65,23 @@ export async function fetchArticleContent(articleUrl: string): Promise<string> {
 }
 
 async function fetchPage(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      'User-Agent': 'GhostWriter/1.0 (content-curation-bot)',
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    },
-    signal: AbortSignal.timeout(15000),
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        'User-Agent': 'GhostWriter/1.0 (content-curation-bot)',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error(`Request to ${url} timed out after 15 seconds`);
+    }
+    throw new Error(
+      `Could not reach ${url}: ${err instanceof Error ? err.message : 'network error'}`,
+    );
+  }
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
   }

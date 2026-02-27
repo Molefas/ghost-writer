@@ -37,16 +37,21 @@ export async function getAll<T>(
   indexKey: string,
   keyFn: (id: string) => string,
 ): Promise<T[]> {
-  const ids = ((await storage.get(indexKey)) as string[] | null) ?? [];
-  if (ids.length === 0) return [];
-  const keys = ids.map(keyFn);
-  const map = await storage.getMany(keys);
-  const items: T[] = [];
-  for (const key of keys) {
-    const val = map.get(key);
-    if (val) items.push(val as T);
+  try {
+    const ids = ((await storage.get(indexKey)) as string[] | null) ?? [];
+    if (ids.length === 0) return [];
+    const keys = ids.map(keyFn);
+    const map = await storage.getMany(keys);
+    const items: T[] = [];
+    for (const key of keys) {
+      const val = map.get(key);
+      if (val) items.push(val as T);
+    }
+    return items;
+  } catch (err) {
+    console.error(`Failed to load collection from ${indexKey}:`, err);
+    return [];
   }
-  return items;
 }
 
 export async function getById<T>(
@@ -54,6 +59,11 @@ export async function getById<T>(
   keyFn: (id: string) => string,
   id: string,
 ): Promise<T | null> {
-  const val = await storage.get(keyFn(id));
-  return (val as T) ?? null;
+  try {
+    const val = await storage.get(keyFn(id));
+    return (val as T) ?? null;
+  } catch (err) {
+    console.error(`Failed to load item ${id}:`, err);
+    return null;
+  }
 }

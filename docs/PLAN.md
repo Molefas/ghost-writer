@@ -6,8 +6,8 @@
 
 ## Current Status
 
-**Last completed phase**: Phase 4 (Gmail Newsletter Integration)
-**Next action**: Execute Phase 5 (System Prompt & Polish)
+**Last completed phase**: Phase 5 (System Prompt & Polish)
+**Next action**: All phases complete — ready for publishing
 **Working directory**: `/Users/ruimolefas/Code/trikhub-skills/ghost-writer/`
 **Branch**: standalone repo (not inside monorepo)
 
@@ -18,7 +18,7 @@
 - [x] **Phase 2**: Blog Scraping & Inspirations — scraper, scorer, blog scan, inspiration search
 - [x] **Phase 3**: Content Creation Engine — article/LI/X generation, draft workflow
 - [x] **Phase 4**: Gmail Newsletter Integration — OAuth, email parsing, newsletter pipeline
-- [ ] **Phase 5**: System Prompt & Polish — comprehensive prompt, error handling, classic prompts
+- [x] **Phase 5**: System Prompt & Polish — comprehensive prompt, error handling, classic prompts
 
 ---
 
@@ -340,10 +340,10 @@ npx trik lint .                                   # Accept node:fs warning only
 
 ### Deliverables
 
-- [ ] 5.1 Comprehensive `src/prompts/system.md` covering all 12 tools, workflows, formatting, error recovery
-- [ ] 5.2 Error handling in all tools: failed fetches, expired OAuth, empty storage, invalid inputs
-- [ ] 5.3 Finalize `docs/mcp_gap.md` with all discovered documentation gaps
-- [ ] 5.4 Update progress tracker to all complete
+- [x] 5.1 Comprehensive `src/prompts/system.md` covering all 12 tools, workflows, formatting, error recovery
+- [x] 5.2 Error handling in all tools: failed fetches, expired OAuth, empty storage, invalid inputs
+- [x] 5.3 Finalize `docs/mcp_gap.md` with all discovered documentation gaps
+- [x] 5.4 Update progress tracker to all complete
 
 ### Classic Prompts the System Prompt Must Handle
 

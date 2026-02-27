@@ -45,36 +45,49 @@ export function scanBlog(storage: TrikStorageContext) {
         const existingUrls = new Set(existing.map((i) => i.url));
 
         let added = 0;
+        let failed = 0;
         for (const article of articles) {
           if (existingUrls.has(article.url)) continue;
 
-          const id = `insp_${nanoid(10)}`;
-          const score = scoreInspiration(article.title, article.description, interestsContent);
-          const inspiration: Inspiration = {
-            id,
-            sourceId: source.id,
-            title: article.title,
-            description: article.description,
-            url: article.url,
-            score,
-            addedAt: new Date().toISOString(),
-            tags: [],
-          };
-          await storage.set(KEYS.inspiration(id), inspiration);
-          await addToIndex(storage, KEYS.inspirationIndex, id);
-          added++;
+          try {
+            const id = `insp_${nanoid(10)}`;
+            const score = scoreInspiration(article.title, article.description, interestsContent);
+            const inspiration: Inspiration = {
+              id,
+              sourceId: source.id,
+              title: article.title,
+              description: article.description,
+              url: article.url,
+              score,
+              addedAt: new Date().toISOString(),
+              tags: [],
+            };
+            await storage.set(KEYS.inspiration(id), inspiration);
+            await addToIndex(storage, KEYS.inspirationIndex, id);
+            added++;
+          } catch {
+            failed++;
+          }
         }
 
         // Update source lastScanned
-        source.lastScanned = new Date().toISOString();
-        await storage.set(KEYS.source(source.id), source);
+        try {
+          source.lastScanned = new Date().toISOString();
+          await storage.set(KEYS.source(source.id), source);
+        } catch {
+          // Non-critical: scan results are still valid
+        }
 
-        return JSON.stringify({
+        const result: Record<string, unknown> = {
           blogName: source.name,
           articleCount: added,
           totalDiscovered: articles.length,
-          duplicatesSkipped: articles.length - added,
-        });
+          duplicatesSkipped: articles.length - added - failed,
+        };
+        if (failed > 0) {
+          result.failedToSave = failed;
+        }
+        return JSON.stringify(result);
       } catch (err) {
         return JSON.stringify({
           blogName: source.name,

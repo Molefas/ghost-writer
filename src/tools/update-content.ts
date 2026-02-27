@@ -27,7 +27,15 @@ export function updateContent(storage: TrikStorageContext) {
       }
       content.updatedAt = new Date().toISOString();
 
-      await storage.set(KEYS.content(content.id), content);
+      try {
+        await storage.set(KEYS.content(content.id), content);
+      } catch (err) {
+        return JSON.stringify({
+          contentType: content.type,
+          contentTitle: content.title,
+          error: `Failed to save content: ${err instanceof Error ? err.message : 'unknown error'}`,
+        });
+      }
 
       return JSON.stringify({
         contentType: content.type,

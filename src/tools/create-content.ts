@@ -76,8 +76,16 @@ export function createContent(storage: TrikStorageContext) {
         updatedAt: now,
       };
 
-      await storage.set(KEYS.content(id), content);
-      await addToIndex(storage, KEYS.contentIndex, id);
+      try {
+        await storage.set(KEYS.content(id), content);
+        await addToIndex(storage, KEYS.contentIndex, id);
+      } catch (err) {
+        return JSON.stringify({
+          contentType: input.type,
+          contentTitle: input.title,
+          error: `Failed to save content draft: ${err instanceof Error ? err.message : 'unknown error'}`,
+        });
+      }
 
       // Return gathered materials for the LLM to generate content
       return JSON.stringify({

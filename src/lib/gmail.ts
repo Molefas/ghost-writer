@@ -129,15 +129,23 @@ export async function getAuthenticatedClient(
   // Auto-refresh if the token is expired or about to expire (within 60s)
   const now = Date.now();
   if (tokens.expiry_date <= now + 60_000) {
-    const { credentials: refreshed } = await oauth2Client.refreshAccessToken();
-    const updatedTokens: GmailTokens = {
-      access_token: refreshed.access_token ?? tokens.access_token,
-      refresh_token: refreshed.refresh_token ?? tokens.refresh_token,
-      expiry_date: refreshed.expiry_date ?? Date.now() + 3600 * 1000,
-      token_type: refreshed.token_type ?? tokens.token_type,
-    };
-    await storage.set(KEYS.gmailTokens, updatedTokens);
-    oauth2Client.setCredentials(updatedTokens);
+    try {
+      const { credentials: refreshed } = await oauth2Client.refreshAccessToken();
+      const updatedTokens: GmailTokens = {
+        access_token: refreshed.access_token ?? tokens.access_token,
+        refresh_token: refreshed.refresh_token ?? tokens.refresh_token,
+        expiry_date: refreshed.expiry_date ?? Date.now() + 3600 * 1000,
+        token_type: refreshed.token_type ?? tokens.token_type,
+      };
+      await storage.set(KEYS.gmailTokens, updatedTokens);
+      oauth2Client.setCredentials(updatedTokens);
+    } catch (err) {
+      // Clear stale tokens so gmailAuth can start fresh
+      await storage.delete(KEYS.gmailTokens).catch(() => {});
+      throw new Error(
+        'Gmail access token expired and could not be refreshed. Please re-authenticate using the gmailAuth tool.',
+      );
+    }
   }
 
   return google.gmail({ version: 'v1', auth: oauth2Client });

@@ -62,7 +62,15 @@ export function manageContent(storage: TrikStorageContext) {
 
           content.status = input.status;
           content.updatedAt = new Date().toISOString();
-          await storage.set(KEYS.content(content.id), content);
+          try {
+            await storage.set(KEYS.content(content.id), content);
+          } catch (err) {
+            return JSON.stringify({
+              action: 'status_changed',
+              resultCount: 0,
+              error: `Failed to update status: ${err instanceof Error ? err.message : 'unknown error'}`,
+            });
+          }
 
           return JSON.stringify({
             action: 'status_changed',
@@ -95,8 +103,16 @@ export function manageContent(storage: TrikStorageContext) {
             });
           }
 
-          await storage.delete(KEYS.content(content.id));
-          await removeFromIndex(storage, KEYS.contentIndex, content.id);
+          try {
+            await storage.delete(KEYS.content(content.id));
+            await removeFromIndex(storage, KEYS.contentIndex, content.id);
+          } catch (err) {
+            return JSON.stringify({
+              action: 'deleted',
+              resultCount: 0,
+              error: `Failed to delete content: ${err instanceof Error ? err.message : 'unknown error'}`,
+            });
+          }
 
           return JSON.stringify({
             action: 'deleted',

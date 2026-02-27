@@ -69,76 +69,96 @@ export function scanNewsletters(storage: TrikStorageContext, config: TrikConfigC
         const newInspirations: Record<string, Inspiration> = {};
         const newIds: string[] = [];
 
+        const failedSources: string[] = [];
+
         for (const source of newsletterSources) {
-          // Search emails by sender address
-          const emails = await searchEmails(gmail, source.email!, maxEmails);
-          totalEmailCount += emails.length;
+          try {
+            // Search emails by sender address
+            const emails = await searchEmails(gmail, source.email!, maxEmails);
+            totalEmailCount += emails.length;
 
-          // Fetch email content with bounded concurrency
-          for (let i = 0; i < emails.length; i += CONTENT_CONCURRENCY) {
-            const batch = emails.slice(i, i + CONTENT_CONCURRENCY);
-            const contents = await Promise.all(
-              batch.map(async (email) => {
-                try {
-                  const content = await getEmailContent(gmail, email.messageId);
-                  return { email, content };
-                } catch {
-                  return null;
+            // Fetch email content with bounded concurrency
+            for (let i = 0; i < emails.length; i += CONTENT_CONCURRENCY) {
+              const batch = emails.slice(i, i + CONTENT_CONCURRENCY);
+              const contents = await Promise.all(
+                batch.map(async (email) => {
+                  try {
+                    const content = await getEmailContent(gmail, email.messageId);
+                    return { email, content };
+                  } catch {
+                    return null;
+                  }
+                }),
+              );
+
+              for (const result of contents) {
+                if (!result) continue;
+                const { email, content } = result;
+                const links = extractLinksFromEmail(content.html);
+
+                for (const link of links) {
+                  if (existingUrls.has(link.url)) {
+                    totalDuplicatesSkipped++;
+                    continue;
+                  }
+
+                  const id = `insp_${nanoid(10)}`;
+                  const score = scoreInspiration(link.text, email.snippet, interestsContent);
+                  const inspiration: Inspiration = {
+                    id,
+                    sourceId: source.id,
+                    title: link.text,
+                    description: email.snippet,
+                    url: link.url,
+                    score,
+                    addedAt: new Date().toISOString(),
+                    tags: [],
+                  };
+
+                  newInspirations[KEYS.inspiration(id)] = inspiration;
+                  newIds.push(id);
+                  existingUrls.add(link.url);
+                  totalNewInspirations++;
                 }
-              }),
-            );
-
-            for (const result of contents) {
-              if (!result) continue;
-              const { email, content } = result;
-              const links = extractLinksFromEmail(content.html);
-
-              for (const link of links) {
-                if (existingUrls.has(link.url)) {
-                  totalDuplicatesSkipped++;
-                  continue;
-                }
-
-                const id = `insp_${nanoid(10)}`;
-                const score = scoreInspiration(link.text, email.snippet, interestsContent);
-                const inspiration: Inspiration = {
-                  id,
-                  sourceId: source.id,
-                  title: link.text,
-                  description: email.snippet,
-                  url: link.url,
-                  score,
-                  addedAt: new Date().toISOString(),
-                  tags: [],
-                };
-
-                newInspirations[KEYS.inspiration(id)] = inspiration;
-                newIds.push(id);
-                existingUrls.add(link.url);
-                totalNewInspirations++;
               }
             }
-          }
 
-          // Update source lastScanned timestamp
-          source.lastScanned = new Date().toISOString();
-          await storage.set(KEYS.source(source.id), source);
+            // Update source lastScanned timestamp
+            source.lastScanned = new Date().toISOString();
+            await storage.set(KEYS.source(source.id), source).catch(() => {});
+          } catch (err) {
+            failedSources.push(source.name);
+          }
         }
 
         // Batch write all new inspirations and update index once
         if (newIds.length > 0) {
-          await storage.setMany(newInspirations);
-          const currentIndex =
-            ((await storage.get(KEYS.inspirationIndex)) as string[] | null) ?? [];
-          await storage.set(KEYS.inspirationIndex, [...currentIndex, ...newIds]);
+          try {
+            await storage.setMany(newInspirations);
+            const currentIndex =
+              ((await storage.get(KEYS.inspirationIndex)) as string[] | null) ?? [];
+            await storage.set(KEYS.inspirationIndex, [...currentIndex, ...newIds]);
+          } catch (err) {
+            return JSON.stringify({
+              emailCount: totalEmailCount,
+              senderCount: newsletterSources.length,
+              newInspirations: 0,
+              duplicatesSkipped: totalDuplicatesSkipped,
+              error: `Found ${totalNewInspirations} new articles but failed to save them: ${err instanceof Error ? err.message : 'unknown error'}`,
+            });
+          }
         }
 
-        return JSON.stringify({
+        const result: Record<string, unknown> = {
           emailCount: totalEmailCount,
           senderCount: newsletterSources.length,
           newInspirations: totalNewInspirations,
           duplicatesSkipped: totalDuplicatesSkipped,
-        });
+        };
+        if (failedSources.length > 0) {
+          result.failedSources = failedSources;
+        }
+        return JSON.stringify(result);
       } catch (err) {
         return JSON.stringify({
           emailCount: 0,
