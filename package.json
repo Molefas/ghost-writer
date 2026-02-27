@@ -1,0 +1,28 @@
+{
+  "name": "@molefas/ghost-writer",
+  "version": "1.0.0",
+  "description": "Content automation trik — manage sources, curate inspirations, create content in your voice",
+  "type": "module",
+  "main": "dist/agent.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@trikhub/sdk": "^0.12.0",
+    "@langchain/anthropic": "^0.3.0",
+    "@langchain/core": "^0.3.0",
+    "@langchain/langgraph": "^0.2.0",
+    "zod": "^3.25.0",
+    "cheerio": "^1.0.0",
+    "nanoid": "^5.0.0",
+    "googleapis": "^140.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

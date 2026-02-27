@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 2,
+  "id": "ghost-writer",
+  "name": "Ghost Writer",
+  "description": "Content automation assistant — manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
+  "version": "1.0.0",
+  "agent": {
+    "mode": "conversational",
+    "handoffDescription": "Manages content creation workflow — curate blog articles and newsletters into scored inspirations, then generate articles, LinkedIn posts, and X posts in the user's writing voice with iterative draft refinement",
+    "systemPromptFile": "./src/prompts/system.md",
+    "model": {
+      "capabilities": ["tool_use"]
+    },
+    "domain": ["content creation", "writing", "blog curation", "social media", "newsletters"]
+  },
+  "tools": {
+    "manageSources": {
+      "description": "Add, list, remove, or update content sources (blogs, articles, newsletters)",
+      "logTemplate": "Source {{action}}: {{sourceType}} \"{{sourceName}}\"",
+      "logSchema": {
+        "action": {
+          "type": "string",
+          "enum": ["added", "removed", "listed", "updated"]
+        },
+        "sourceType": {
+          "type": "string",
+          "enum": ["blog", "article", "newsletter"]
+        },
+        "sourceName": {
+          "type": "string",
+          "maxLength": 100
+        }
+      }
+    },
+    "scanBlog": {
+      "description": "Scan a blog source to discover articles and create inspirations with relevance scores",
+      "logTemplate": "Scanned \"{{blogName}}\": {{articleCount}} articles",
+      "logSchema": {
+        "blogName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "articleCount": {
+          "type": "integer"
+        }
+      }
+    },
+    "scanNewsletters": {
+      "description": "Scan Gmail for newsletter emails and extract article links as inspirations",
+      "logTemplate": "Scanned newsletters: {{emailCount}} emails",
+      "logSchema": {
+        "emailCount": {
+          "type": "integer"
+        },
+        "senderCount": {
+          "type": "integer"
+        }
+      }
+    },
+    "searchInspirations": {
+      "description": "Search and filter curated inspirations by query, tags, score, source, or date",
+      "logTemplate": "Searched: {{resultCount}} results",
+      "logSchema": {
+        "resultCount": {
+          "type": "integer"
+        },
+        "searchCriteria": {
+          "type": "string",
+          "maxLength": 150
+        }
+      }
+    },
+    "getInspirationContent": {
+      "description": "Fetch the full article text for an inspiration by lazy-loading from its URL",
+      "logTemplate": "Fetched \"{{inspirationTitle}}\" ({{contentLength}} chars)",
+      "logSchema": {
+        "inspirationTitle": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "contentLength": {
+          "type": "integer"
+        }
+      }
+    },
+    "createContent": {
+      "description": "Gather source materials and create a new content draft (article, LinkedIn post, or X post)",
+      "logTemplate": "Created {{contentType}} draft: \"{{contentTitle}}\"",
+      "logSchema": {
+        "contentType": {
+          "type": "string",
+          "enum": ["article", "linkedin", "x_post"]
+        },
+        "contentTitle": {
+          "type": "string",
+          "maxLength": 150
+        }
+      }
+    },
+    "updateContent": {
+      "description": "Save or update a content draft's body text and timestamp",
+      "logTemplate": "Updated {{contentType}}: \"{{contentTitle}}\"",
+      "logSchema": {
+        "contentType": {
+          "type": "string",
+          "enum": ["article", "linkedin", "x_post"]
+        },
+        "contentTitle": {
+          "type": "string",
+          "maxLength": 150
+        }
+      }
+    },
+    "manageContent": {
+      "description": "List, filter, change status, or delete content pieces",
+      "logTemplate": "Content {{action}}: {{resultCount}} pieces",
+      "logSchema": {
+        "action": {
+          "type": "string",
+          "enum": ["listed", "status_changed", "deleted"]
+        },
+        "resultCount": {
+          "type": "integer"
+        }
+      }
+    },
+    "readVoice": {
+      "description": "Load the user's writing voice profile from the voice.md file",
+      "logTemplate": "Loaded voice profile ({{charCount}} chars)",
+      "logSchema": {
+        "charCount": {
+          "type": "integer"
+        }
+      }
+    },
+    "readInterests": {
+      "description": "Load the user's topic interests from the interests.md file",
+      "logTemplate": "Loaded interests ({{charCount}} chars)",
+      "logSchema": {
+        "charCount": {
+          "type": "integer"
+        }
+      }
+    },
+    "gmailAuth": {
+      "description": "Initiate or complete Gmail OAuth authentication for newsletter access",
+      "logTemplate": "Gmail auth: {{authStatus}}",
+      "logSchema": {
+        "authStatus": {
+          "type": "string",
+          "enum": ["initiated", "completed", "failed", "already_authenticated"]
+        }
+      }
+    },
+    "gmailSearch": {
+      "description": "Search Gmail emails by sender name or address",
+      "logTemplate": "Gmail: {{resultCount}} emails from \"{{senderName}}\"",
+      "logSchema": {
+        "resultCount": {
+          "type": "integer"
+        },
+        "senderName": {
+          "type": "string",
+          "maxLength": 100
+        }
+      }
+    }
+  },
+  "capabilities": {
+    "storage": {
+      "enabled": true
+    }
+  },
+  "config": {
+    "required": [
+      {
+        "key": "ANTHROPIC_API_KEY",
+        "description": "Anthropic API key for the trik's internal LLM"
+      }
+    ],
+    "optional": [
+      {
+        "key": "GOOGLE_CLIENT_ID",
+        "description": "Google OAuth client ID for Gmail newsletter access"
+      },
+      {
+        "key": "GOOGLE_CLIENT_SECRET",
+        "description": "Google OAuth client secret for Gmail newsletter access"
+      }
+    ]
+  },
+  "limits": {
+    "maxTurnTimeMs": 60000
+  },
+  "entry": {
+    "module": "./dist/agent.js",
+    "export": "default"
+  }
+}
