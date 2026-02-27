@@ -43,8 +43,8 @@ export default wrapAgent((context: TrikContext) => {
     manageContent(context.storage),
     // Phase 4: Gmail integration
     gmailAuth(context.storage, context.config),
-    gmailSearch(context.storage),
-    scanNewsletters(context.storage),
+    gmailSearch(context.storage, context.config),
+    scanNewsletters(context.storage, context.config),
     // Handoff escape
     transferBackTool,
   ];
