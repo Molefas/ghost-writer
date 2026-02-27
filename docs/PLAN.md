@@ -6,8 +6,8 @@
 
 ## Current Status
 
-**Last completed phase**: Phase 1 (Foundation)
-**Next action**: Execute Phase 2 (Blog Scraping & Inspirations)
+**Last completed phase**: Phase 2 (Blog Scraping & Inspirations)
+**Next action**: Execute Phase 3 (Content Creation Engine)
 **Working directory**: `/Users/ruimolefas/Code/trikhub-skills/ghost-writer/`
 **Branch**: standalone repo (not inside monorepo)
 
@@ -15,7 +15,7 @@
 
 - [x] **Phase 0**: Copy plan + create `mcp_gap.md`
 - [x] **Phase 1**: Foundation — scaffold, data model, source CRUD, voice/interests
-- [ ] **Phase 2**: Blog Scraping & Inspirations — scraper, scorer, blog scan, inspiration search
+- [x] **Phase 2**: Blog Scraping & Inspirations — scraper, scorer, blog scan, inspiration search
 - [ ] **Phase 3**: Content Creation Engine — article/LI/X generation, draft workflow
 - [ ] **Phase 4**: Gmail Newsletter Integration — OAuth, email parsing, newsletter pipeline
 - [ ] **Phase 5**: System Prompt & Polish — comprehensive prompt, error handling, classic prompts
