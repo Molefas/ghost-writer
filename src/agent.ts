@@ -15,6 +15,7 @@ import { getInspirationContent } from './tools/get-content.js';
 import { createContent } from './tools/create-content.js';
 import { updateContent } from './tools/update-content.js';
 import { manageContent } from './tools/manage-content.js';
+import { manageInspirations } from './tools/manage-inspirations.js';
 import { gmailAuth } from './tools/gmail-auth.js';
 import { gmailSearch } from './tools/gmail-search.js';
 import { scanNewsletters } from './tools/scan-newsletters.js';
@@ -36,6 +37,7 @@ export default wrapAgent((context: TrikContext) => {
     // Phase 2: Scraping & inspirations
     scanBlog(context.storage),
     searchInspirations(context.storage),
+    manageInspirations(context.storage),
     getInspirationContent(context.storage),
     // Phase 3: Content creation
     createContent(context.storage),

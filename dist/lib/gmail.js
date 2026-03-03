@@ -1,10 +1,13 @@
+import http from 'node:http';
+import { URL } from 'node:url';
 import { google } from 'googleapis';
 import * as cheerio from 'cheerio';
 import { KEYS } from './storage.js';
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-const REDIRECT_URI = 'http://localhost';
+const OAUTH_PORT = 9874;
+const REDIRECT_URI = `http://127.0.0.1:${OAUTH_PORT}`;
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 // ---------------------------------------------------------------------------
 // OAuth2 Flow
@@ -43,6 +46,103 @@ export async function exchangeCode(clientId, clientSecret, code, storage) {
     };
     await storage.set(KEYS.gmailTokens, stored);
     return stored;
+}
+/**
+ * Start a one-click OAuth flow by spinning up a temporary localhost HTTP server
+ * that catches Google's redirect automatically.
+ *
+ * The promise resolves as soon as the server is listening, returning the
+ * `authUrl` the user should open in their browser. The server runs in the
+ * background: once the user authorizes, it captures the code, exchanges it for
+ * tokens, persists them, and shuts itself down. A 120-second timeout
+ * auto-cleans up if the user never authorizes.
+ *
+ * Because the tool call returns immediately with the auth URL, the agent can
+ * tell the user to open it. On the next `gmailAuth` call (or any Gmail tool
+ * call) the tokens will already be stored.
+ */
+export async function autoAuth(clientId, clientSecret, storage) {
+    const TIMEOUT_MS = 120_000;
+    return new Promise((resolve, reject) => {
+        let timer;
+        let settled = false;
+        const server = http.createServer(async (req, res) => {
+            try {
+                const url = new URL(req.url ?? '/', REDIRECT_URI);
+                const code = url.searchParams.get('code');
+                const error = url.searchParams.get('error');
+                if (error) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><body><h2>Authorization denied</h2><p>You can close this tab.</p></body></html>');
+                    cleanup();
+                    return;
+                }
+                if (!code) {
+                    // Not the OAuth callback (e.g. favicon request)
+                    res.writeHead(404);
+                    res.end();
+                    return;
+                }
+                // Exchange the code for tokens
+                const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, REDIRECT_URI);
+                const { tokens } = await oauth2Client.getToken(code);
+                if (!tokens.access_token || !tokens.refresh_token) {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('<html><body><h2>Authentication failed</h2><p>Missing tokens. You can close this tab.</p></body></html>');
+                    cleanup();
+                    return;
+                }
+                const stored = {
+                    access_token: tokens.access_token,
+                    refresh_token: tokens.refresh_token,
+                    expiry_date: tokens.expiry_date ?? Date.now() + 3600 * 1000,
+                    token_type: tokens.token_type ?? 'Bearer',
+                };
+                await storage.set(KEYS.gmailTokens, stored);
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.end('<html><body><h2>Gmail connected!</h2><p>You can close this tab and return to the conversation.</p></body></html>');
+                cleanup();
+            }
+            catch {
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.end('<html><body><h2>Something went wrong</h2><p>You can close this tab and try again.</p></body></html>');
+                cleanup();
+            }
+        });
+        function cleanup() {
+            if (timer)
+                clearTimeout(timer);
+            server.close();
+        }
+        server.on('error', (err) => {
+            if (!settled) {
+                settled = true;
+                if (err.code === 'EADDRINUSE') {
+                    reject(new Error(`Port ${OAUTH_PORT} is already in use. Close whatever is using it and try again.`));
+                }
+                else {
+                    reject(new Error(`Failed to start local auth server: ${err.message}`));
+                }
+            }
+        });
+        // Listen on the fixed OAuth port
+        server.listen(OAUTH_PORT, '127.0.0.1', () => {
+            // Auto-cleanup after timeout
+            timer = setTimeout(() => {
+                cleanup();
+            }, TIMEOUT_MS);
+            // Build the auth URL pointing to our local server
+            const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, REDIRECT_URI);
+            const authUrl = oauth2Client.generateAuthUrl({
+                access_type: 'offline',
+                scope: SCOPES,
+                prompt: 'consent',
+            });
+            // Resolve immediately with the auth URL — server keeps running in background
+            settled = true;
+            resolve({ authUrl });
+        });
+    });
 }
 /**
  * Build an authenticated Gmail API client from stored tokens.

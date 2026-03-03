@@ -1,4 +1,5 @@
 import { tool } from '@langchain/core/tools';
+import { z } from 'zod';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +24,6 @@ export function readInterests() {
     }, {
         name: 'readInterests',
         description: "Load the user's topic interests from the interests.md file",
-        schema: {},
+        schema: z.object({}),
     });
 }

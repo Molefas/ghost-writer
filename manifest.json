@@ -57,6 +57,19 @@
         }
       }
     },
+    "manageInspirations": {
+      "description": "Delete one or more inspirations by ID",
+      "logTemplate": "Inspirations {{action}}: {{resultCount}} removed",
+      "logSchema": {
+        "action": {
+          "type": "string",
+          "enum": ["deleted"]
+        },
+        "resultCount": {
+          "type": "integer"
+        }
+      }
+    },
     "searchInspirations": {
       "description": "Search and filter curated inspirations by query, tags, score, source, or date",
       "logTemplate": "Searched: {{resultCount}} results",
@@ -143,12 +156,12 @@
       }
     },
     "gmailAuth": {
-      "description": "Initiate or complete Gmail OAuth authentication for newsletter access",
+      "description": "Connect Gmail for newsletter access via one-click OAuth — starts a local server that captures authorization automatically",
       "logTemplate": "Gmail auth: {{authStatus}}",
       "logSchema": {
         "authStatus": {
           "type": "string",
-          "enum": ["initiated", "completed", "failed", "already_authenticated"]
+          "enum": ["awaiting_authorization", "completed", "failed", "already_authenticated"]
         }
       }
     },

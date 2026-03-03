@@ -19,6 +19,18 @@ export async function discoverArticles(blogUrl) {
     // Strategy 2: HTML heuristic extraction
     return extractArticlesFromHtml($, blogUrl);
 }
+export async function scrapeArticleMeta(articleUrl) {
+    const html = await fetchPage(articleUrl);
+    const $ = cheerio.load(html);
+    const title = $('meta[property="og:title"]').attr('content')?.trim() ||
+        $('title').text().trim() ||
+        articleUrl;
+    const description = $('meta[property="og:description"]').attr('content')?.trim() ||
+        $('meta[name="description"]').attr('content')?.trim() ||
+        $('article p').first().text().trim().slice(0, 300) ||
+        '';
+    return { title, url: articleUrl, description };
+}
 export async function fetchArticleContent(articleUrl) {
     const html = await fetchPage(articleUrl);
     const $ = cheerio.load(html);

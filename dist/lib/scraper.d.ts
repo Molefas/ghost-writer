@@ -4,4 +4,5 @@ export interface DiscoveredArticle {
     description: string;
 }
 export declare function discoverArticles(blogUrl: string): Promise<DiscoveredArticle[]>;
+export declare function scrapeArticleMeta(articleUrl: string): Promise<DiscoveredArticle>;
 export declare function fetchArticleContent(articleUrl: string): Promise<string>;
