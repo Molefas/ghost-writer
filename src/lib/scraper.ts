@@ -28,6 +28,24 @@ export async function discoverArticles(blogUrl: string): Promise<DiscoveredArtic
   return extractArticlesFromHtml($, blogUrl);
 }
 
+export async function scrapeArticleMeta(articleUrl: string): Promise<DiscoveredArticle> {
+  const html = await fetchPage(articleUrl);
+  const $ = cheerio.load(html);
+
+  const title =
+    $('meta[property="og:title"]').attr('content')?.trim() ||
+    $('title').text().trim() ||
+    articleUrl;
+
+  const description =
+    $('meta[property="og:description"]').attr('content')?.trim() ||
+    $('meta[name="description"]').attr('content')?.trim() ||
+    $('article p').first().text().trim().slice(0, 300) ||
+    '';
+
+  return { title, url: articleUrl, description };
+}
+
 export async function fetchArticleContent(articleUrl: string): Promise<string> {
   const html = await fetchPage(articleUrl);
   const $ = cheerio.load(html);

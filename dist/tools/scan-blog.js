@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { KEYS, getById, getAll, addToIndex } from '../lib/storage.js';
-import { discoverArticles } from '../lib/scraper.js';
+import { discoverArticles, scrapeArticleMeta } from '../lib/scraper.js';
 import { scoreInspiration } from '../lib/scorer.js';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -19,15 +19,24 @@ function loadInterests() {
 export function scanBlog(storage) {
     return tool(async (input) => {
         const source = await getById(storage, KEYS.source, input.sourceId);
-        if (!source || source.type !== 'blog' || !source.url) {
+        if (!source || !source.url) {
             return JSON.stringify({
                 blogName: 'unknown',
                 articleCount: 0,
-                error: 'Source not found or is not a blog with a URL',
+                error: 'Source not found or has no URL',
+            });
+        }
+        if (source.type !== 'blog' && source.type !== 'article') {
+            return JSON.stringify({
+                blogName: source.name,
+                articleCount: 0,
+                error: 'Use scanNewsletters for newsletter sources',
             });
         }
         try {
-            const articles = await discoverArticles(source.url);
+            const articles = source.type === 'article'
+                ? [await scrapeArticleMeta(source.url)]
+                : await discoverArticles(source.url);
             const interestsContent = loadInterests();
             // Get existing inspirations to deduplicate
             const existing = await getAll(storage, KEYS.inspirationIndex, KEYS.inspiration);
@@ -86,7 +95,7 @@ export function scanBlog(storage) {
         }
     }, {
         name: 'scanBlog',
-        description: 'Scan a blog source to discover articles and create inspirations with relevance scores',
+        description: 'Scan a blog or article source to discover articles and create inspirations with relevance scores. For blogs, discovers multiple articles via RSS/HTML. For single articles, scrapes the article metadata directly.',
         schema: z.object({
             sourceId: z.string().describe('ID of the blog source to scan'),
         }),

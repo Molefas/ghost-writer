@@ -31,6 +31,23 @@ export declare function getAuthUrl(clientId: string, clientSecret: string): stri
  */
 export declare function exchangeCode(clientId: string, clientSecret: string, code: string, storage: TrikStorageContext): Promise<GmailTokens>;
 /**
+ * Start a one-click OAuth flow by spinning up a temporary localhost HTTP server
+ * that catches Google's redirect automatically.
+ *
+ * The promise resolves as soon as the server is listening, returning the
+ * `authUrl` the user should open in their browser. The server runs in the
+ * background: once the user authorizes, it captures the code, exchanges it for
+ * tokens, persists them, and shuts itself down. A 120-second timeout
+ * auto-cleans up if the user never authorizes.
+ *
+ * Because the tool call returns immediately with the auth URL, the agent can
+ * tell the user to open it. On the next `gmailAuth` call (or any Gmail tool
+ * call) the tokens will already be stored.
+ */
+export declare function autoAuth(clientId: string, clientSecret: string, storage: TrikStorageContext): Promise<{
+    authUrl: string;
+}>;
+/**
  * Build an authenticated Gmail API client from stored tokens.
  *
  * Automatically refreshes the access token if it is expired (or will expire
