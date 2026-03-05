@@ -2,16 +2,24 @@
   "schemaVersion": 2,
   "id": "ghost-writer",
   "name": "Ghost Writer",
-  "description": "Content automation assistant — manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
-  "version": "1.0.0",
+  "description": "Content automation assistant \u2014 manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
+  "version": "1.1.2",
   "agent": {
     "mode": "conversational",
-    "handoffDescription": "Manages content creation workflow — curate blog articles and newsletters into scored inspirations, then generate articles, LinkedIn posts, and X posts in the user's writing voice with iterative draft refinement",
+    "handoffDescription": "Manages content creation workflow \u2014 curate blog articles and newsletters into scored inspirations, then generate articles, LinkedIn posts, and X posts in the user's writing voice with iterative draft refinement",
     "systemPromptFile": "./src/prompts/system.md",
     "model": {
-      "capabilities": ["tool_use"]
+      "capabilities": [
+        "tool_use"
+      ]
     },
-    "domain": ["content creation", "writing", "blog curation", "social media", "newsletters"]
+    "domain": [
+      "content creation",
+      "writing",
+      "blog curation",
+      "social media",
+      "newsletters"
+    ]
   },
   "tools": {
     "manageSources": {
@@ -20,11 +28,20 @@
       "logSchema": {
         "action": {
           "type": "string",
-          "enum": ["added", "removed", "listed", "updated"]
+          "enum": [
+            "added",
+            "removed",
+            "listed",
+            "updated"
+          ]
         },
         "sourceType": {
           "type": "string",
-          "enum": ["blog", "article", "newsletter"]
+          "enum": [
+            "blog",
+            "article",
+            "newsletter"
+          ]
         },
         "sourceName": {
           "type": "string",
@@ -63,7 +80,9 @@
       "logSchema": {
         "action": {
           "type": "string",
-          "enum": ["deleted"]
+          "enum": [
+            "deleted"
+          ]
         },
         "resultCount": {
           "type": "integer"
@@ -102,7 +121,11 @@
       "logSchema": {
         "contentType": {
           "type": "string",
-          "enum": ["article", "linkedin", "x_post"]
+          "enum": [
+            "article",
+            "linkedin",
+            "x_post"
+          ]
         },
         "contentTitle": {
           "type": "string",
@@ -116,7 +139,11 @@
       "logSchema": {
         "contentType": {
           "type": "string",
-          "enum": ["article", "linkedin", "x_post"]
+          "enum": [
+            "article",
+            "linkedin",
+            "x_post"
+          ]
         },
         "contentTitle": {
           "type": "string",
@@ -130,7 +157,11 @@
       "logSchema": {
         "action": {
           "type": "string",
-          "enum": ["listed", "status_changed", "deleted"]
+          "enum": [
+            "listed",
+            "status_changed",
+            "deleted"
+          ]
         },
         "resultCount": {
           "type": "integer"
@@ -156,12 +187,17 @@
       }
     },
     "gmailAuth": {
-      "description": "Connect Gmail for newsletter access via one-click OAuth — starts a local server that captures authorization automatically",
+      "description": "Connect Gmail for newsletter access via one-click OAuth \u2014 starts a local server that captures authorization automatically",
       "logTemplate": "Gmail auth: {{authStatus}}",
       "logSchema": {
         "authStatus": {
           "type": "string",
-          "enum": ["awaiting_authorization", "completed", "failed", "already_authenticated"]
+          "enum": [
+            "awaiting_authorization",
+            "completed",
+            "failed",
+            "already_authenticated"
+          ]
         }
       }
     },
@@ -181,6 +217,12 @@
   },
   "capabilities": {
     "storage": {
+      "enabled": true
+    },
+    "filesystem": {
+      "enabled": true
+    },
+    "shell": {
       "enabled": true
     }
   },
