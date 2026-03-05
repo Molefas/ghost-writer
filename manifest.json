@@ -3,7 +3,7 @@
   "id": "ghost-writer",
   "name": "Ghost Writer",
   "description": "Content automation assistant \u2014 manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "agent": {
     "mode": "conversational",
     "handoffDescription": "Manages content creation workflow \u2014 curate blog articles and newsletters into scored inspirations, then generate articles, LinkedIn posts, and X posts in the user's writing voice with iterative draft refinement",
@@ -217,6 +217,12 @@
   },
   "capabilities": {
     "storage": {
+      "enabled": true
+    },
+    "filesystem": {
+      "enabled": true
+    },
+    "shell": {
       "enabled": true
     }
   },
