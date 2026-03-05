@@ -1,6 +1,7 @@
 # Ghost Writer
 
 Content automation trik for [TrikHub](https://trikhub.com) — manage sources, curate article inspirations, and create articles, LinkedIn posts, and X posts in your writing voice.
+This is a demo trik to showcase some capabilitites and not a production-level trik, although it can easily be turned into one - it's on the backlog.
 
 ## Features
 
@@ -63,6 +64,8 @@ The dashboard reads directly from Ghost Writer's storage at `~/.trikhub/storage/
 - **Content** — read drafts and finished content with markdown rendering
 - **Settings** — configure Gmail connection and view config status
 
+*Note:* For now the UI has to be manually started, which is not a limitation, simply outside the scope of this Demo Trik.
+
 ## Gmail Setup (Optional)
 
 Gmail integration lets you scan newsletter emails for article links. Skip this if you only use blog sources.
@@ -78,8 +81,10 @@ Gmail integration lets you scan newsletter emails for article links. Skip this i
 1. Go to **APIs & Services > Credentials**
 2. Click **Create Credentials > OAuth client ID**
 3. Application type: **Web application**
-4. Add authorized redirect URI: `http://127.0.0.1:9874`
-5. Copy the **Client ID** and **Client Secret**
+4. Add the gmail.readonly scope
+5. Add authorized redirect URI: `http://127.0.0.1:9874`
+6. Copy the **Client ID** and **Client Secret**
+7. Add your email as a test user in the Audience tab
 
 ### 3. Add credentials to config
 
