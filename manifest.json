@@ -3,7 +3,7 @@
   "id": "ghost-writer",
   "name": "Ghost Writer",
   "description": "A demo Trik for content automation assistant — manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "agent": {
     "mode": "conversational",
     "handoffDescription": "Manages content creation workflow — curate blog articles and newsletters into scored inspirations, then generate articles, LinkedIn posts, and X posts in the user's writing voice with iterative draft refinement",
