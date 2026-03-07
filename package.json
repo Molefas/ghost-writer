@@ -4,9 +4,6 @@
   "description": "Content automation trik \u2014 manage sources, curate inspirations, create content in your voice",
   "type": "module",
   "main": "dist/agent.js",
-  "bin": {
-    "ghost-writer-ui": "./bin/ui.mjs"
-  },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",

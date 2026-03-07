@@ -10,6 +10,7 @@ export const KEYS = {
   gmailTokens: 'gmail:tokens',
   profileVoice: 'profile:voice',
   profileInterests: 'profile:interests',
+  configStatus: 'config:status',
 } as const;
 
 export async function addToIndex(

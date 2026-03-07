@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Mail, Check, X, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -18,9 +18,7 @@ export default function SettingsPage() {
   const [gmail, setGmail] = useState<GmailStatus>({ connected: false });
   const [config, setConfig] = useState<ConfigStatus>({});
   const [loading, setLoading] = useState(true);
-  const [connecting, setConnecting] = useState(false);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadStatus = useCallback(async () => {
     const [gmailRes, configRes] = await Promise.all([
@@ -38,47 +36,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     loadStatus();
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
   }, [loadStatus]);
-
-  async function handleConnect() {
-    setConnecting(true);
-    try {
-      const res = await fetch("/api/gmail", { method: "POST" });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || "Failed to start OAuth flow");
-        return;
-      }
-      const { authUrl } = await res.json();
-      window.open(authUrl, "_blank");
-
-      // Poll for connection
-      pollRef.current = setInterval(async () => {
-        const statusRes = await fetch("/api/gmail");
-        const status = await statusRes.json();
-        if (status.connected) {
-          if (pollRef.current) clearInterval(pollRef.current);
-          pollRef.current = null;
-          setGmail(status);
-          setConnecting(false);
-        }
-      }, 2000);
-
-      // Stop polling after 2 minutes
-      setTimeout(() => {
-        if (pollRef.current) {
-          clearInterval(pollRef.current);
-          pollRef.current = null;
-          setConnecting(false);
-        }
-      }, 120_000);
-    } catch {
-      setConnecting(false);
-    }
-  }
 
   async function handleDisconnect() {
     await fetch("/api/gmail", { method: "DELETE" });
@@ -139,9 +97,9 @@ export default function SettingsPage() {
               Disconnect Gmail
             </Button>
           ) : (
-            <Button size="sm" onClick={handleConnect} disabled={connecting}>
-              {connecting ? "Waiting for authorization..." : "Connect Gmail"}
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              Use the Ghost Writer conversation to connect Gmail
+            </p>
           )}
         </div>
       </div>
@@ -155,7 +113,7 @@ export default function SettingsPage() {
           <div>
             <h3 className="font-semibold">Configuration</h3>
             <p className="text-sm text-muted-foreground">
-              Keys configured in ~/.trikhub/secrets.json
+              Configuration status
             </p>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getConfigStatus } from "@/lib/config";
+import { getValue } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(getConfigStatus());
+  const status = getValue<Record<string, boolean>>("config:status");
+  return NextResponse.json(status ?? {});
 }

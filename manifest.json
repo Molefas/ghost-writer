@@ -7,6 +7,7 @@
   "agent": {
     "mode": "conversational",
     "handoffDescription": "Manages content creation workflow — curate blog articles and newsletters into scored inspirations, then generate articles, LinkedIn posts, and X posts in the user's writing voice with iterative draft refinement",
+    "systemPromptFile": "./src/prompts/system.ts",
     "model": {
       "capabilities": [
         "tool_use"

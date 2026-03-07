@@ -9,6 +9,7 @@ export declare const KEYS: {
     readonly gmailTokens: "gmail:tokens";
     readonly profileVoice: "profile:voice";
     readonly profileInterests: "profile:interests";
+    readonly configStatus: "config:status";
 };
 export declare function addToIndex(storage: TrikStorageContext, indexKey: string, id: string): Promise<void>;
 export declare function removeFromIndex(storage: TrikStorageContext, indexKey: string, id: string): Promise<void>;

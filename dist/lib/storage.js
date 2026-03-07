@@ -8,6 +8,7 @@ export const KEYS = {
     gmailTokens: 'gmail:tokens',
     profileVoice: 'profile:voice',
     profileInterests: 'profile:interests',
+    configStatus: 'config:status',
 };
 export async function addToIndex(storage, indexKey, id) {
     const ids = (await storage.get(indexKey)) ?? [];

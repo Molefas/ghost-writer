@@ -1,6 +1,7 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { wrapAgent, transferBackTool } from '@trikhub/sdk';
+import { KEYS } from './lib/storage.js';
 import { manageSources } from './tools/manage-sources.js';
 import { manageVoice } from './tools/manage-voice.js';
 import { manageInterests } from './tools/manage-interests.js';
@@ -41,6 +42,13 @@ export default wrapAgent((context) => {
         // Handoff escape
         transferBackTool,
     ];
+    // Write config status for UI dashboard
+    const configStatus = {
+        ANTHROPIC_API_KEY: context.config.has('ANTHROPIC_API_KEY'),
+        GOOGLE_CLIENT_ID: context.config.has('GOOGLE_CLIENT_ID'),
+        GOOGLE_CLIENT_SECRET: context.config.has('GOOGLE_CLIENT_SECRET'),
+    };
+    context.storage.set(KEYS.configStatus, configStatus);
     return createReactAgent({
         llm: model,
         tools,
