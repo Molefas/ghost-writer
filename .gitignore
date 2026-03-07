@@ -4,3 +4,5 @@ dist/
 *.tgz
 ui/.next/
 CLAUDE.md
+docs/*
+.worktrees/
