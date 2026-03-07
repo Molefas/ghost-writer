@@ -29,11 +29,9 @@ This is a demo trik to showcase some capabilitites and not a production-level tr
    }
    ```
 
-3. Customize your writing voice in `src/data/voice.md` — describe your tone, style preferences, and any writing rules.
+3. Start a conversation — Ghost Writer will walk you through a quick onboarding to set up your writing voice and topic interests on first run.
 
-4. Set your topic interests in `src/data/interests.md` — list primary and secondary topics so inspirations get scored by relevance.
-
-5. Start a conversation and add your first source:
+4. Start a conversation and add your first source:
 
    > "Add https://example.com/blog as a blog source and scan it for articles"
 
@@ -153,49 +151,26 @@ It will open a browser window for Google authorization. After you approve, the t
 
 ## Voice & Interests
 
-### Voice Profile (`src/data/voice.md`)
+Ghost Writer collects your voice profile and topic interests during first-run onboarding and stores them in persistent storage.
 
-Describes how Ghost Writer should write. Include things like:
+### Voice Profile
+
+Describes how Ghost Writer should write. You'll be asked about things like:
 
 - **Tone** — conversational, formal, witty, direct
 - **Structure preferences** — short paragraphs, use of headers, bullet points
 - **Vocabulary** — technical level, jargon usage, preferred phrases
 - **Personality** — humor style, level of authority, empathy
 
-Example:
+You can update your voice anytime by asking Ghost Writer to change it.
 
-```markdown
-## Tone
-Direct and conversational. Write like you're explaining to a smart colleague over coffee.
+### Topic Interests
 
-## Structure
-- Short paragraphs (2-3 sentences max)
-- Use headers to break up longer pieces
-- Lead with the insight, then support it
+Controls how inspirations are scored for relevance. Higher scores = more relevant to your interests. You'll be asked for primary and secondary interests during onboarding.
 
-## Rules
-- No corporate jargon ("leverage", "synergize")
-- Use concrete examples over abstract statements
-- End with a forward-looking question or takeaway
-```
+Example topics: AI agents, developer tools, technical writing, open source, API design patterns.
 
-### Topic Interests (`src/data/interests.md`)
-
-Controls how inspirations are scored for relevance. Higher scores = more relevant to your interests.
-
-Example:
-
-```markdown
-## Primary Interests
-- AI agents and autonomous systems
-- Developer tools and productivity
-- Technical writing and content strategy
-
-## Secondary Interests
-- Open source community building
-- API design patterns
-- Startup engineering culture
-```
+You can update your interests anytime by asking Ghost Writer to update them.
 
 ## Content Types
 
