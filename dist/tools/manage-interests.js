@@ -12,6 +12,9 @@ export function manageInterests(storage) {
             });
         }
         // action === 'update'
+        if (!input.content) {
+            return JSON.stringify({ error: 'content is required for update action' });
+        }
         await storage.set(KEYS.profileInterests, input.content);
         return JSON.stringify({
             action: 'updated',

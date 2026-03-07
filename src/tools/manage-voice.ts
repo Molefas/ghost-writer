@@ -16,10 +16,13 @@ export function manageVoice(storage: TrikStorageContext) {
       }
 
       // action === 'update'
-      await storage.set(KEYS.profileVoice, input.content!);
+      if (!input.content) {
+        return JSON.stringify({ error: 'content is required for update action' });
+      }
+      await storage.set(KEYS.profileVoice, input.content);
       return JSON.stringify({
         action: 'updated',
-        charCount: input.content!.length,
+        charCount: input.content.length,
       });
     },
     {

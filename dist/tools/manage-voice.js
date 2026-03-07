@@ -12,6 +12,9 @@ export function manageVoice(storage) {
             });
         }
         // action === 'update'
+        if (!input.content) {
+            return JSON.stringify({ error: 'content is required for update action' });
+        }
         await storage.set(KEYS.profileVoice, input.content);
         return JSON.stringify({
             action: 'updated',

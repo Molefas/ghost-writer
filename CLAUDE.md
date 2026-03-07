@@ -46,7 +46,7 @@ Gmail OAuth tokens stored at key `gmail:tokens`.
 
 Index-backed collections in `src/lib/storage.ts`. Each entity type has an index array (`[id1, id2, ...]`). Helpers: `addToIndex()`, `removeFromIndex()`, `getAll()`, `getById()`. Batch retrieval via `storage.getMany()`.
 
-### Tools (12 total)
+### Tools (13 total)
 
 | Tool | File | Dependencies | Purpose |
 |------|------|-------------|---------|
@@ -55,6 +55,7 @@ Index-backed collections in `src/lib/storage.ts`. Each entity type has an index 
 | `manageInterests` | `src/tools/manage-interests.ts` | storage | Read or update topic interests for relevance scoring |
 | `scanBlog` | `src/tools/scan-blog.ts` | storage | Discovers articles via RSS/HTML, creates scored inspirations |
 | `searchInspirations` | `src/tools/search-inspirations.ts` | storage | Multi-criteria inspiration search (query, score, tags, date) |
+| `manageInspirations` | `src/tools/manage-inspirations.ts` | storage | Delete one or more inspirations by ID |
 | `getInspirationContent` | `src/tools/get-content.ts` | storage | Lazy-fetches full article text from URL |
 | `createContent` | `src/tools/create-content.ts` | storage | Gathers materials + voice, creates empty draft record |
 | `updateContent` | `src/tools/update-content.ts` | storage | Persists generated content body text |
@@ -79,7 +80,7 @@ Tools are factory functions that close over `context.storage` (and `context.conf
 
 `manifest.json` follows TrikHub schema v2. Key fields:
 - `agent.mode: "conversational"` with `handoffDescription` for gateway routing
-- `agent.systemPromptFile: "./src/prompts/system.ts"`
+- System prompt inlined in `src/prompts/system.ts`, passed as `messageModifier` (no `systemPromptFile` in manifest)
 - `tools` — Each declares `logTemplate` + `logSchema` (required for conversational mode; security-constrained string types)
 - `capabilities.storage.enabled: true` (only storage — no filesystem or shell)
 - `config.required`: `ANTHROPIC_API_KEY`; `config.optional`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
@@ -132,12 +133,13 @@ Gmail config is optional — only needed for newsletter scanning.
 src/
 ├── agent.ts                    # wrapAgent() entry point
 ├── prompts/system.ts           # System prompt with onboarding and workflow patterns
-├── tools/                      # 12 LangChain tool factories
+├── tools/                      # 13 LangChain tool factories
 │   ├── manage-sources.ts
 │   ├── manage-voice.ts
 │   ├── manage-interests.ts
 │   ├── scan-blog.ts
 │   ├── search-inspirations.ts
+│   ├── manage-inspirations.ts
 │   ├── get-content.ts
 │   ├── create-content.ts
 │   ├── update-content.ts
