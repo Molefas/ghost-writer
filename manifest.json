@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "ghost-writer",
   "name": "Ghost Writer",
-  "description": "Content automation assistant \u2014 manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
+  "description": "A demo Trik for content automation assistant \u2014 manage sources, curate inspirations, and create articles, LinkedIn posts, and X posts in your writing voice",
   "version": "1.1.2",
   "agent": {
     "mode": "conversational",
@@ -18,7 +18,8 @@
       "writing",
       "blog curation",
       "social media",
-      "newsletters"
+      "newsletters",
+      "demo"
     ]
   },
   "tools": {
