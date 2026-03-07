@@ -6,19 +6,6 @@ import type { Source, Inspiration } from '../lib/types.js';
 import { KEYS, getById, getAll, addToIndex } from '../lib/storage.js';
 import { discoverArticles, scrapeArticleMeta } from '../lib/scraper.js';
 import { scoreInspiration } from '../lib/scorer.js';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-function loadInterests(): string {
-  try {
-    return readFileSync(join(__dirname, '../../src/data/interests.md'), 'utf-8');
-  } catch {
-    return '';
-  }
-}
 
 export function scanBlog(storage: TrikStorageContext) {
   return tool(
@@ -44,7 +31,7 @@ export function scanBlog(storage: TrikStorageContext) {
           source.type === 'article'
             ? [await scrapeArticleMeta(source.url)]
             : await discoverArticles(source.url);
-        const interestsContent = loadInterests();
+        const interestsContent = (await storage.get(KEYS.profileInterests) as string) ?? '';
 
         // Get existing inspirations to deduplicate
         const existing = await getAll<Inspiration>(

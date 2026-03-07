@@ -1,27 +1,16 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { TrikStorageContext } from '@trikhub/sdk';
 import type { Content, Inspiration } from '../lib/types.js';
 import { KEYS, addToIndex, getById } from '../lib/storage.js';
 import { fetchArticleContent } from '../lib/scraper.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
 export function createContent(storage: TrikStorageContext) {
   return tool(
     async (input) => {
       // Load voice profile
-      const voicePath = join(__dirname, '../../src/data/voice.md');
-      let voice = '';
-      try {
-        voice = readFileSync(voicePath, 'utf-8');
-      } catch {
-        // voice.md missing — proceed without it
-      }
+      const voice = (await storage.get(KEYS.profileVoice) as string) ?? '';
 
       // Fetch inspiration details and content
       const materials: Array<{
@@ -92,7 +81,7 @@ export function createContent(storage: TrikStorageContext) {
         contentType: input.type,
         contentTitle: input.title,
         contentId: id,
-        voice: voice || '[No voice profile found — create src/data/voice.md]',
+        voice: voice || '[No voice profile found — complete onboarding to set up your voice]',
         materials: materials.map((m) => ({
           title: m.title,
           description: m.description,
