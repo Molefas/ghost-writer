@@ -4,18 +4,6 @@ import { nanoid } from 'nanoid';
 import { KEYS, getAll } from '../lib/storage.js';
 import { getAuthenticatedClient, searchEmails, getEmailContent, extractLinksFromEmail } from '../lib/gmail.js';
 import { scoreInspiration } from '../lib/scorer.js';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
-function loadInterests() {
-    try {
-        return readFileSync(join(__dirname, '../../src/data/interests.md'), 'utf-8');
-    }
-    catch {
-        return '';
-    }
-}
 export function scanNewsletters(storage, config) {
     return tool(async (input) => {
         try {
@@ -39,7 +27,7 @@ export function scanNewsletters(storage, config) {
             // Get authenticated Gmail client
             const gmail = await getAuthenticatedClient(storage, config);
             // Load interests for scoring
-            const interestsContent = loadInterests();
+            const interestsContent = await storage.get(KEYS.profileInterests) ?? '';
             // Get existing inspirations for deduplication
             const existing = await getAll(storage, KEYS.inspirationIndex, KEYS.inspiration);
             const existingUrls = new Set(existing.map((i) => i.url));

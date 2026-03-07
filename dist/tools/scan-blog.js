@@ -4,18 +4,6 @@ import { nanoid } from 'nanoid';
 import { KEYS, getById, getAll, addToIndex } from '../lib/storage.js';
 import { discoverArticles, scrapeArticleMeta } from '../lib/scraper.js';
 import { scoreInspiration } from '../lib/scorer.js';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
-function loadInterests() {
-    try {
-        return readFileSync(join(__dirname, '../../src/data/interests.md'), 'utf-8');
-    }
-    catch {
-        return '';
-    }
-}
 export function scanBlog(storage) {
     return tool(async (input) => {
         const source = await getById(storage, KEYS.source, input.sourceId);
@@ -37,7 +25,7 @@ export function scanBlog(storage) {
             const articles = source.type === 'article'
                 ? [await scrapeArticleMeta(source.url)]
                 : await discoverArticles(source.url);
-            const interestsContent = loadInterests();
+            const interestsContent = await storage.get(KEYS.profileInterests) ?? '';
             // Get existing inspirations to deduplicate
             const existing = await getAll(storage, KEYS.inspirationIndex, KEYS.inspiration);
             const existingUrls = new Set(existing.map((i) => i.url));

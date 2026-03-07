@@ -8,6 +8,8 @@ export const KEYS = {
   inspirationIndex: 'index:inspirations',
   contentIndex: 'index:content',
   gmailTokens: 'gmail:tokens',
+  profileVoice: 'profile:voice',
+  profileInterests: 'profile:interests',
 } as const;
 
 export async function addToIndex(

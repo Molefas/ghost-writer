@@ -6,19 +6,6 @@ import type { Source, Inspiration } from '../lib/types.js';
 import { KEYS, getAll } from '../lib/storage.js';
 import { getAuthenticatedClient, searchEmails, getEmailContent, extractLinksFromEmail } from '../lib/gmail.js';
 import { scoreInspiration } from '../lib/scorer.js';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-function loadInterests(): string {
-  try {
-    return readFileSync(join(__dirname, '../../src/data/interests.md'), 'utf-8');
-  } catch {
-    return '';
-  }
-}
 
 export function scanNewsletters(storage: TrikStorageContext, config: TrikConfigContext) {
   return tool(
@@ -48,7 +35,7 @@ export function scanNewsletters(storage: TrikStorageContext, config: TrikConfigC
         const gmail = await getAuthenticatedClient(storage, config);
 
         // Load interests for scoring
-        const interestsContent = loadInterests();
+        const interestsContent = (await storage.get(KEYS.profileInterests) as string) ?? '';
 
         // Get existing inspirations for deduplication
         const existing = await getAll<Inspiration>(
