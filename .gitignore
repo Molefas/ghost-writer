@@ -2,7 +2,7 @@ node_modules/
 dist/
 .env
 *.tgz
-ui/.next/
+ui/
 CLAUDE.md
 docs/*
 .worktrees/

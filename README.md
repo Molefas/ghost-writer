@@ -31,38 +31,9 @@ This is a demo trik to showcase some capabilitites and not a production-level tr
 
 3. Start a conversation — Ghost Writer will walk you through a quick onboarding to set up your writing voice and topic interests on first run.
 
-4. Start a conversation and add your first source:
+4. Add your first source:
 
    > "Add https://example.com/blog as a blog source and scan it for articles"
-
-## Dashboard UI
-
-Ghost Writer includes a web dashboard for browsing sources, inspirations, and content visually.
-
-### Launch the UI
-
-After installing the trik, start the dashboard with:
-
-```bash
-npx ghost-writer-ui
-```
-
-Or from the project root using npm scripts:
-
-```bash
-npm run ui          # dev server (http://localhost:3000)
-npm run ui:build    # production build
-npm run ui:start    # start production server
-```
-
-The dashboard reads directly from Ghost Writer's storage at `~/.trikhub/storage/storage.db` and provides pages for:
-
-- **Sources** — view and manage blog/newsletter sources
-- **Inspirations** — browse scored inspirations, filter by score/tags/date
-- **Content** — read drafts and finished content with markdown rendering
-- **Settings** — configure Gmail connection and view config status
-
-*Note:* For now the UI has to be manually started, which is not a limitation, simply outside the scope of this Demo Trik.
 
 ## Gmail Setup (Optional)
 
