@@ -28,7 +28,7 @@ No test suite exists yet. After building, the trik is consumed via a TrikHub gat
 
 ### Entry Point
 
-`src/agent.ts` — Uses `wrapAgent()` factory from `@trikhub/sdk`. Creates a LangGraph ReAct agent with Claude Sonnet 4, 12 tools + `transferBackTool`, and a system prompt loaded from `src/prompts/system.md`.
+`src/agent.ts` — Uses `wrapAgent()` factory from `@trikhub/sdk`. Creates a LangGraph ReAct agent with Claude Sonnet 4, 12 tools + `transferBackTool`, and a system prompt loaded from `src/prompts/system.ts`.
 
 ### Data Model
 
@@ -51,8 +51,8 @@ Index-backed collections in `src/lib/storage.ts`. Each entity type has an index 
 | Tool | File | Dependencies | Purpose |
 |------|------|-------------|---------|
 | `manageSources` | `src/tools/manage-sources.ts` | storage | CRUD for content sources (blog/article/newsletter) |
-| `readVoice` | `src/tools/read-voice.ts` | — | Loads `src/data/voice.md` writing style profile |
-| `readInterests` | `src/tools/read-interests.ts` | — | Loads `src/data/interests.md` topic interests |
+| `manageVoice` | `src/tools/manage-voice.ts` | storage | Read or update writing voice profile |
+| `manageInterests` | `src/tools/manage-interests.ts` | storage | Read or update topic interests for relevance scoring |
 | `scanBlog` | `src/tools/scan-blog.ts` | storage | Discovers articles via RSS/HTML, creates scored inspirations |
 | `searchInspirations` | `src/tools/search-inspirations.ts` | storage | Multi-criteria inspiration search (query, score, tags, date) |
 | `getInspirationContent` | `src/tools/get-content.ts` | storage | Lazy-fetches full article text from URL |
@@ -75,18 +75,13 @@ Tools are factory functions that close over `context.storage` (and `context.conf
 | `src/lib/scorer.ts` | Interest-based relevance scoring (1-10 scale from keyword matching) |
 | `src/lib/gmail.ts` | OAuth token management, email fetching, link extraction with domain filtering |
 
-### User-Editable Files
-
-- `src/data/voice.md` — Writing tone, style, and preferences
-- `src/data/interests.md` — Primary and secondary topic interests (used for relevance scoring)
-
 ## Manifest Structure
 
 `manifest.json` follows TrikHub schema v2. Key fields:
 - `agent.mode: "conversational"` with `handoffDescription` for gateway routing
-- `agent.systemPromptFile: "./src/prompts/system.md"`
+- `agent.systemPromptFile: "./src/prompts/system.ts"`
 - `tools` — Each declares `logTemplate` + `logSchema` (required for conversational mode; security-constrained string types)
-- `capabilities.storage.enabled: true`
+- `capabilities.storage.enabled: true` (only storage — no filesystem or shell)
 - `config.required`: `ANTHROPIC_API_KEY`; `config.optional`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 
 ### Log Schema Security Rules
@@ -102,7 +97,10 @@ String fields in `logSchema` MUST have one of: `enum`, `maxLength`, `pattern`, o
 `manageSources(add, type=newsletter)` → `gmailAuth()` → `scanNewsletters()` → `searchEmails()` → `extractLinksFromEmail()` → filter non-article links → `scoreInspiration()` → create Inspiration records
 
 ### Content Creation
-`createContent(type, title, inspirationIds)` → fetch inspiration records + lazy-load article content → load `voice.md` → return materials to LLM → LLM generates → `updateContent(contentId, body)` → iterate → `manageContent(setStatus=done)`
+`createContent(type, title, inspirationIds)` → fetch inspiration records + lazy-load article content → load voice from storage → return materials to LLM → LLM generates → `updateContent(contentId, body)` → iterate → `manageContent(setStatus=done)`
+
+### Onboarding (First Run)
+Agent calls `manageVoice(read)` + `manageInterests(read)` → if either empty → conversational onboarding collects voice profile then interests → saves via `manageVoice(update)` / `manageInterests(update)` → proceeds normally
 
 ## Configuration
 
@@ -133,11 +131,11 @@ Gmail config is optional — only needed for newsletter scanning.
 ```
 src/
 ├── agent.ts                    # wrapAgent() entry point
-├── prompts/system.md           # 195-line system prompt with workflow patterns
+├── prompts/system.ts           # System prompt with onboarding and workflow patterns
 ├── tools/                      # 12 LangChain tool factories
 │   ├── manage-sources.ts
-│   ├── read-voice.ts
-│   ├── read-interests.ts
+│   ├── manage-voice.ts
+│   ├── manage-interests.ts
 │   ├── scan-blog.ts
 │   ├── search-inspirations.ts
 │   ├── get-content.ts
@@ -153,9 +151,6 @@ src/
 │   ├── scraper.ts              # RSS/HTML scraping with Cheerio
 │   ├── scorer.ts               # Interest-based relevance scoring
 │   └── gmail.ts                # OAuth, token refresh, email parsing
-└── data/
-    ├── voice.md                # User's writing style profile
-    └── interests.md            # User's topic interests
 dist/                           # Compiled output (committed for publishing)
 docs/
 ├── PLAN.md                     # Implementation roadmap (5 phases, all complete)
