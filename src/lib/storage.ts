@@ -7,6 +7,8 @@ export const KEYS = {
   sourceIndex: 'index:sources',
   inspirationIndex: 'index:inspirations',
   contentIndex: 'index:content',
+  reference: (id: string) => `ref:${id}`,
+  referenceIndex: 'index:references',
   gmailTokens: 'gmail:tokens',
   profileVoice: 'profile:voice',
   profileInterests: 'profile:interests',
