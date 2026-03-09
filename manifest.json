@@ -195,6 +195,19 @@
         }
       }
     },
+    "manageReferences": {
+      "description": "Manage the library of books and thought leaders for inline citations",
+      "logTemplate": "References {{action}}: {{resultCount}} items",
+      "logSchema": {
+        "action": {
+          "type": "string",
+          "enum": ["added", "listed", "deleted", "searched", "merged", "exists"]
+        },
+        "resultCount": {
+          "type": "integer"
+        }
+      }
+    },
     "gmailAuth": {
       "description": "Connect Gmail for newsletter access via one-click OAuth — starts a local server that captures authorization automatically",
       "logTemplate": "Gmail auth: {{authStatus}}",

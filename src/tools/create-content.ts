@@ -2,8 +2,8 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import type { TrikStorageContext } from '@trikhub/sdk';
-import type { Content, Inspiration } from '../lib/types.js';
-import { KEYS, addToIndex, getById } from '../lib/storage.js';
+import type { Content, Inspiration, Reference } from '../lib/types.js';
+import { KEYS, addToIndex, getById, getAll } from '../lib/storage.js';
 import { fetchArticleContent } from '../lib/scraper.js';
 
 export function createContent(storage: TrikStorageContext) {
@@ -11,6 +11,13 @@ export function createContent(storage: TrikStorageContext) {
     async (input) => {
       // Load voice profile
       const voice = (await storage.get(KEYS.profileVoice) as string) ?? '';
+
+      // Load references library
+      const references = await getAll<Reference>(
+        storage,
+        KEYS.referenceIndex,
+        KEYS.reference,
+      );
 
       // Fetch inspiration details and content
       const materials: Array<{
@@ -89,6 +96,13 @@ export function createContent(storage: TrikStorageContext) {
           content: m.content.slice(0, 5000),
         })),
         instructions: input.instructions || null,
+        references: references.map((r) => ({
+          type: r.type,
+          name: r.name,
+          ...(r.author && { author: r.author }),
+          ...(r.knownFor && { knownFor: r.knownFor }),
+          topics: r.topics,
+        })),
         guidelines:
           input.type === 'article'
             ? '800-1500 words, structured with headers, match the voice profile'

@@ -29,3 +29,14 @@ export interface Content {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Reference {
+  id: string;
+  type: 'book' | 'person';
+  name: string;
+  author?: string;
+  knownFor?: string;
+  topics: string[];
+  addedAt: string;
+  addedBy: 'user' | 'agent';
+}
