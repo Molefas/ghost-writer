@@ -14,6 +14,7 @@ import { createContent } from './tools/create-content.js';
 import { updateContent } from './tools/update-content.js';
 import { manageContent } from './tools/manage-content.js';
 import { manageInspirations } from './tools/manage-inspirations.js';
+import { manageReferences } from './tools/manage-references.js';
 import { gmailAuth } from './tools/gmail-auth.js';
 import { gmailSearch } from './tools/gmail-search.js';
 import { scanNewsletters } from './tools/scan-newsletters.js';
@@ -30,6 +31,7 @@ export default wrapAgent((context: TrikContext) => {
     manageSources(context.storage),
     manageVoice(context.storage),
     manageInterests(context.storage),
+    manageReferences(context.storage),
     // Scraping & inspirations
     scanBlog(context.storage),
     searchInspirations(context.storage),
