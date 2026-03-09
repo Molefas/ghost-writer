@@ -29,12 +29,17 @@ export function manageReferences(storage: TrikStorageContext) {
 
           if (match) {
             // Merge new topics into existing reference
+            const existingLower = match.topics.map((t) => t.toLowerCase());
             const newTopics = (input.topics ?? []).filter(
-              (t) => !match.topics.includes(t),
+              (t) => !existingLower.includes(t.toLowerCase()),
             );
             if (newTopics.length > 0) {
               match.topics.push(...newTopics);
-              await storage.set(KEYS.reference(match.id), match);
+              try {
+                await storage.set(KEYS.reference(match.id), match);
+              } catch (err) {
+                return JSON.stringify({ error: `Failed to merge topics: ${(err as Error).message}` });
+              }
               return JSON.stringify({
                 action: 'merged',
                 reference: match,
@@ -59,8 +64,12 @@ export function manageReferences(storage: TrikStorageContext) {
             addedBy: input.addedBy ?? 'agent',
           };
 
-          await storage.set(KEYS.reference(id), ref);
-          await addToIndex(storage, KEYS.referenceIndex, id);
+          try {
+            await storage.set(KEYS.reference(id), ref);
+            await addToIndex(storage, KEYS.referenceIndex, id);
+          } catch (err) {
+            return JSON.stringify({ error: `Failed to add reference: ${(err as Error).message}` });
+          }
 
           return JSON.stringify({ action: 'added', reference: ref });
         }
@@ -99,8 +108,12 @@ export function manageReferences(storage: TrikStorageContext) {
           if (!ref) {
             return JSON.stringify({ error: 'Reference not found' });
           }
-          await storage.delete(KEYS.reference(input.referenceId));
-          await removeFromIndex(storage, KEYS.referenceIndex, input.referenceId);
+          try {
+            await storage.delete(KEYS.reference(input.referenceId));
+            await removeFromIndex(storage, KEYS.referenceIndex, input.referenceId);
+          } catch (err) {
+            return JSON.stringify({ error: `Failed to delete reference: ${(err as Error).message}` });
+          }
           return JSON.stringify({ action: 'deleted', name: ref.name });
         }
 
