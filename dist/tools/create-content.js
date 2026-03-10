@@ -1,12 +1,14 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
-import { KEYS, addToIndex, getById } from '../lib/storage.js';
+import { KEYS, addToIndex, getById, getAll } from '../lib/storage.js';
 import { fetchArticleContent } from '../lib/scraper.js';
 export function createContent(storage) {
     return tool(async (input) => {
         // Load voice profile
         const voice = await storage.get(KEYS.profileVoice) ?? '';
+        // Load references library
+        const references = await getAll(storage, KEYS.referenceIndex, KEYS.reference);
         // Fetch inspiration details and content
         const materials = [];
         for (const id of input.inspirationIds) {
@@ -71,6 +73,13 @@ export function createContent(storage) {
                 content: m.content.slice(0, 5000),
             })),
             instructions: input.instructions || null,
+            references: references.map((r) => ({
+                type: r.type,
+                name: r.name,
+                ...(r.author && { author: r.author }),
+                ...(r.knownFor && { knownFor: r.knownFor }),
+                topics: r.topics,
+            })),
             guidelines: input.type === 'article'
                 ? '800-1500 words, structured with headers, match the voice profile'
                 : input.type === 'linkedin'
