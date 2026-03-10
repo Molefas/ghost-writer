@@ -1,6 +1,6 @@
 {
   "name": "@molefas/ghost-writer",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Content automation trik \u2014 manage sources, curate inspirations, create content in your voice",
   "type": "module",
   "main": "dist/agent.js",
