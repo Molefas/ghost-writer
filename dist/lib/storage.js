@@ -1,3 +1,11 @@
+// Per-key mutex to prevent concurrent read-modify-write races on index arrays
+const indexLocks = new Map();
+function withIndexLock(key, fn) {
+    const prev = indexLocks.get(key) ?? Promise.resolve();
+    const next = prev.then(fn, fn);
+    indexLocks.set(key, next.then(() => { }, () => { }));
+    return next;
+}
 export const KEYS = {
     source: (id) => `source:${id}`,
     inspiration: (id) => `insp:${id}`,
@@ -12,17 +20,21 @@ export const KEYS = {
     profileInterests: 'profile:interests',
     configStatus: 'config:status',
 };
-export async function addToIndex(storage, indexKey, id) {
-    const ids = (await storage.get(indexKey)) ?? [];
-    if (!ids.includes(id)) {
-        ids.push(id);
-        await storage.set(indexKey, ids);
-    }
+export function addToIndex(storage, indexKey, id) {
+    return withIndexLock(indexKey, async () => {
+        const ids = (await storage.get(indexKey)) ?? [];
+        if (!ids.includes(id)) {
+            ids.push(id);
+            await storage.set(indexKey, ids);
+        }
+    });
 }
-export async function removeFromIndex(storage, indexKey, id) {
-    const ids = (await storage.get(indexKey)) ?? [];
-    const filtered = ids.filter((i) => i !== id);
-    await storage.set(indexKey, filtered);
+export function removeFromIndex(storage, indexKey, id) {
+    return withIndexLock(indexKey, async () => {
+        const ids = (await storage.get(indexKey)) ?? [];
+        const filtered = ids.filter((i) => i !== id);
+        await storage.set(indexKey, filtered);
+    });
 }
 export async function getAll(storage, indexKey, keyFn) {
     try {

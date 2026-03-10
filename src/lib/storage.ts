@@ -1,5 +1,15 @@
 import type { TrikStorageContext } from '@trikhub/sdk';
 
+// Per-key mutex to prevent concurrent read-modify-write races on index arrays
+const indexLocks = new Map<string, Promise<void>>();
+
+function withIndexLock<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const prev = indexLocks.get(key) ?? Promise.resolve();
+  const next = prev.then(fn, fn);
+  indexLocks.set(key, next.then(() => {}, () => {}));
+  return next;
+}
+
 export const KEYS = {
   source: (id: string) => `source:${id}`,
   inspiration: (id: string) => `insp:${id}`,
@@ -15,26 +25,30 @@ export const KEYS = {
   configStatus: 'config:status',
 } as const;
 
-export async function addToIndex(
+export function addToIndex(
   storage: TrikStorageContext,
   indexKey: string,
   id: string,
 ): Promise<void> {
-  const ids = ((await storage.get(indexKey)) as string[] | null) ?? [];
-  if (!ids.includes(id)) {
-    ids.push(id);
-    await storage.set(indexKey, ids);
-  }
+  return withIndexLock(indexKey, async () => {
+    const ids = ((await storage.get(indexKey)) as string[] | null) ?? [];
+    if (!ids.includes(id)) {
+      ids.push(id);
+      await storage.set(indexKey, ids);
+    }
+  });
 }
 
-export async function removeFromIndex(
+export function removeFromIndex(
   storage: TrikStorageContext,
   indexKey: string,
   id: string,
 ): Promise<void> {
-  const ids = ((await storage.get(indexKey)) as string[] | null) ?? [];
-  const filtered = ids.filter((i) => i !== id);
-  await storage.set(indexKey, filtered);
+  return withIndexLock(indexKey, async () => {
+    const ids = ((await storage.get(indexKey)) as string[] | null) ?? [];
+    const filtered = ids.filter((i) => i !== id);
+    await storage.set(indexKey, filtered);
+  });
 }
 
 export async function getAll<T>(
