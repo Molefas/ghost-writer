@@ -6,6 +6,8 @@ export declare const KEYS: {
     readonly sourceIndex: "index:sources";
     readonly inspirationIndex: "index:inspirations";
     readonly contentIndex: "index:content";
+    readonly reference: (id: string) => string;
+    readonly referenceIndex: "index:references";
     readonly gmailTokens: "gmail:tokens";
     readonly profileVoice: "profile:voice";
     readonly profileInterests: "profile:interests";
